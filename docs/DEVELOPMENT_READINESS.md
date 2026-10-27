@@ -12,10 +12,10 @@ The full commercial MVP remains the target. Breaking development into milestones
 
 | Status | Area | Finding / action |
 | --- | --- | --- |
-| APPROVED | Product and audience | Android and iOS; salaried users in India managing multiple debts; INR at launch; web is a development preview. |
+| APPROVED | Product and audience | Android and iOS; users with mixed formal and informal debts and money lent to others; India/INR is the initial launch, with globally adaptable architecture; web is a development preview. |
 | APPROVED | Core ledger | Private borrowing/lending records; current opening snapshot; explicit principal, interest and fee transactions; dated corrections and revision history; independent liability/receivable totals. |
 | APPROVED | Payments and lifecycle | Partial installments, overdue remainders, FIFO unless explicitly allocated, supported principal-only prepayments, increases, adjustments with reasons, forgiveness/write-offs, zero-balance closure, separate archiving and identity-preserving reopening. |
-| APPROVED | Commercial rules | Unlimited core records; free preset categories and basic summaries/exports; Pro custom categories and all four planning tools; ₹99/month, ₹699/year; separate ₹1,499 lifetime ad-free purchase. No timed trial. Banners only on Home/Insights. |
+| APPROVED | Commercial rules | Unlimited core records; Free has exactly 6 borrowing defaults and 6 lending defaults plus up to 3 custom categories per direction; Pro unlocks all 16 borrowing defaults, all 14 lending defaults and unlimited custom categories, plus all four planning tools; ₹99/month, ₹699/year; separate ₹1,499 lifetime ad-free purchase. No timed trial. Banners only on Home/Insights. |
 | APPROVED | Guest, offline and cloud | Guest first record with skip; optional Google/Apple account; offline edits; visible financial conflicts; reviewed guest import with no automatic financial merge or overwrite; sign-in required before purchase. |
 | APPROVED | Privacy and recovery | Device reminders; generic notification content by default; free optional device App Lock; CSV plus authenticated encrypted password-protected backups; no password recovery/backdoor; export before account deletion. |
 | APPROVED | Technology | Existing Expo 58 / React Native 0.88 / React 19.3 / TypeScript 6. No project reinitialization or framework migration. |
@@ -77,3 +77,12 @@ The full commercial MVP remains the target. Breaking development into milestones
 - Native device tests, encryption, cloud integration and purchase/advertising integration have **not** been completed. The app still presents its starter screens; financial domain code is not yet connected to persistence or UI.
 - The standalone Node test runner emits a non-failing module-type detection warning; application module configuration is unchanged. Expo currently resolves ESLint 9 for its lint toolchain; npm warns that this major is deprecated, so a compatible lint-toolchain update remains maintenance work.
 - GitHub Actions workflow added with Node 24 and pinned current official action releases; its hosted execution awaits a push/PR.
+
+## Approved P1 category and audience correction
+
+- Free: exactly 6 default borrowing categories and 6 default lending categories; up to 3 custom categories per direction.
+- Pro: all 16 borrowing defaults, all 14 lending defaults and unlimited custom categories.
+- Downgrade preserves custom categories and historical assignments; existing categories remain usable. Creating new custom categories is blocked when the Free limit is already reached, including retained Pro categories. Archiving cannot bypass the limit or erase historical references.
+- Initial catalog labels are editable implementation defaults with stable, direction-specific identifiers; the counts and access rules above are approved requirements.
+- The audience includes mixed formal/informal borrowers and people who lend money. India/INR is the first configuration, not an assumption embedded in category IDs or ownership architecture.
+- P1 does not enable Supabase, paid entitlements, ads or Pro algorithms. Guest access uses the Free policy; Pro/expired-Pro policy is exercised through repository/domain tests, not an unlock toggle in the app.
