@@ -42,13 +42,14 @@
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "typecheck": "tsc --noEmit && tsc --project tsconfig.tests.json --noEmit",
+    "typecheck": "node scripts/generate-route-types.cjs && tsc --noEmit && tsc --project tsconfig.tests.json --noEmit",
     "test": "node --experimental-strip-types --test tests/*.test.ts",
-    "check": "npm run typecheck && npm run lint && npm test"
+    "check": "npm run typecheck && npm run lint && npm test",
+    "start:dev": "expo start --dev-client"
   },
   "private": true
 }

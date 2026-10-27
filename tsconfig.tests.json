@@ -9,7 +9,9 @@
     "src/domain/**/*.ts",
     "tests/**/*.ts",
     "src/storage/**/*.ts",
-    "src/config/**/*.ts"
+    "src/config/**/*.ts",
+    "src/features/guest/forms.ts",
+    "src/features/guest/selectors.ts"
   ],
   "exclude": [
     "src/storage/open.ts",

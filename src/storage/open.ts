@@ -5,7 +5,7 @@ import * as SQLite from 'expo-sqlite';
 
 import { LocalDatabase, type SqlConnection } from './database.ts';
 import { GuestRepository } from './repository.ts';
-import { obtainDeviceKey, unlockEncryptedConnection } from './security.ts';
+import { obtainDeviceKey, StorageSecurityError, unlockEncryptedConnection } from './security.ts';
 
 const DATABASE_NAME = 'nodebt-guest-v1.db';
 const KEY_NAME = 'nodebt.database.key.v1';
@@ -18,8 +18,8 @@ export function localToday(): string {
   const now = new Date();
   return `${String(now.getFullYear()).padStart(4, '0')}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 }
-async function open(): Promise<GuestRepository> {
-  if (!await SecureStore.isAvailableAsync()) throw new Error('Secure device key storage is unavailable. No ledger was opened.');
+async function createRepository(): Promise<GuestRepository> {
+  if (!await SecureStore.isAvailableAsync()) throw new StorageSecurityError('Secure device key storage is unavailable. No ledger was opened.');
   const key = await obtainDeviceKey({
     getKey: () => SecureStore.getItemAsync(KEY_NAME, secureOptions),
     setKey: (value) => SecureStore.setItemAsync(KEY_NAME, value, secureOptions),
@@ -45,8 +45,15 @@ async function open(): Promise<GuestRepository> {
   } catch (error) {
     await connection.close().catch(() => undefined);
     // Do not expose native SQL strings, file contents or key material in UI/logs.
-    if (error instanceof Error && /native development build|missing|newer Nodebt|catalog|integrity/i.test(error.message)) throw error;
+    if (error instanceof StorageSecurityError || (error instanceof Error && error.message === 'This database needs a newer Nodebt version. It has not been changed.')) throw error;
     throw new Error('Encrypted storage could not be opened or upgraded. Existing data was not reset. Restart and retry with the correct Nodebt build.');
+  }
+}
+async function open(): Promise<GuestRepository> {
+  try { return await createRepository(); }
+  catch (error) {
+    if (error instanceof StorageSecurityError || (error instanceof Error && error.message === 'This database needs a newer Nodebt version. It has not been changed.')) throw error;
+    throw new Error('Secure local storage is unavailable. Existing data was not reset. Restart Nodebt or install the correct native build.');
   }
 }
 export function openGuestRepository(): Promise<GuestRepository> {

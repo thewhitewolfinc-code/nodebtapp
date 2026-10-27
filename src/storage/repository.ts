@@ -2,7 +2,7 @@ import { launch } from '../config/product.ts';
 import { assertCanCreateCategory, canAssignCategory, DEFAULT_CATEGORIES, type Category, type CategoryAccess } from '../domain/categories.ts';
 import { assertDateOnly, assertTimestamp } from '../domain/dates.ts';
 import { createMonthlySchedule, projectInstallments, type Installment } from '../domain/installments.ts';
-import { closeRecord, correctEntry, LedgerError, portfolioTotals, postEntry, projectLedger, reopenRecord,
+import { closeRecord, correctEntry, entryTotal, LedgerError, portfolioTotals, postEntry, projectLedger, reopenRecord,
   type EntryDraft, type EntryRevision } from '../domain/ledger.ts';
 import { assertMinorUnits } from '../domain/money.ts';
 import { LocalDatabase, type SqlConnection } from './database.ts';
@@ -149,7 +149,16 @@ export class GuestRepository {
         let record = current;
         const originalHistory = before.revisions.filter((entry) => entry.recordId === current.id);
         let history: readonly EntryRevision[] = originalHistory;
-        if (command.type === 'post_entry') {
+        if (command.type === 'settle_record') {
+          requireInput(!!command.reason.trim(), 'A settlement reason is required.');
+          requireInput(entryTotal(command.paid) > 0 && entryTotal(command.waived) > 0, 'A partial settlement requires both actual cash and a waived amount.');
+          requireInput(record.interestMode !== 'interest_free' || (command.paid.interestMinor === 0 && command.waived.interestMinor === 0), 'Interest-free records cannot settle interest.');
+          history = postEntry(record, history, { ...command.paid, id: this.services.id(), recordId: record.id,
+            kind: 'payment', effectiveOn: command.effectiveOn, paymentMode: 'installment', reason: command.reason }, context());
+          history = postEntry(record, history, { ...command.waived, id: this.services.id(), recordId: record.id,
+            kind: record.direction === 'borrowed' ? 'forgiveness' : 'write_off', effectiveOn: command.effectiveOn, reason: command.reason }, context());
+          requireInput(projectLedger(record, history).outstandingMinor === 0, 'Settlement must clear the recorded balance. Review the cash and waived components.');
+        } else if (command.type === 'post_entry') {
           const newInterest = command.newInterestMinor ?? 0;
           const newFees = command.newFeesMinor ?? 0;
           assertMinorUnits(newInterest);
@@ -200,7 +209,7 @@ export class GuestRepository {
         result.recordId = record.id;
       }
       await sql.run('INSERT INTO operations(id,request,result,recorded_at) VALUES (?,?,?,?)', [operationId, request, JSON.stringify(result), now]);
-      await sql.run('INSERT INTO outbox(operation_id,payload) VALUES (?,?)', [operationId, JSON.stringify({ version: 1, command, ...result })]);
+      await sql.run('INSERT INTO outbox(operation_id,payload) VALUES (?,?)', [operationId, JSON.stringify({ version: 1, currency: launch.currency, minorUnitScale: launch.minorUnitScale, command, ...result })]);
       return { ...result, snapshot: await this.readSnapshot(sql) };
     });
   }
@@ -214,7 +223,7 @@ export class GuestRepository {
       [revision.revisionId, revision.recordId, revision.id, revision.revision, revision.previousRevisionId ?? null, JSON.stringify(revision)]);
   }
   private async recordEvent(sql: SqlConnection, record: GuestRecord, kind: string, recordedAt: string): Promise<void> {
-    const event: RecordEvent = { id: this.services.id(), recordId: record.id, kind, recordedAt, version: record.version };
+    const event: RecordEvent = { id: this.services.id(), recordId: record.id, kind, recordedAt, version: record.version, record: { ...record } };
     await sql.run('INSERT INTO record_events(id,record_id,payload) VALUES (?,?,?)', [event.id, record.id, JSON.stringify(event)]);
   }
 }

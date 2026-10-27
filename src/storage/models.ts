@@ -17,6 +17,7 @@ export interface RecordEvent {
   readonly kind: string;
   readonly recordedAt: string;
   readonly version: number;
+  readonly record: GuestRecord;
 }
 export interface GuestSnapshot {
   readonly records: readonly GuestRecord[];
@@ -43,6 +44,8 @@ export type GuestCommand =
       readonly kind: Exclude<EntryDraft['kind'], 'opening_balance'>; readonly effectiveOn: string;
       readonly components: Components; readonly reason?: string; readonly paymentMode?: EntryDraft['paymentMode'];
       readonly newInterestMinor?: number; readonly newFeesMinor?: number }
+  | { readonly type: 'settle_record'; readonly recordId: string; readonly expectedVersion: number; readonly effectiveOn: string;
+      readonly paid: Components; readonly waived: Components; readonly reason: string }
   | { readonly type: 'correct_entry'; readonly recordId: string; readonly expectedVersion: number;
       readonly entryId: string; readonly expectedRevisionId: string; readonly effectiveOn: string;
       readonly components: Components; readonly reason: string; readonly state: 'posted' | 'void';

@@ -9,6 +9,8 @@ import { MIGRATIONS, migrateDatabase } from '../src/storage/migrations.ts';
 import type { GuestCommand, GuestSnapshot } from '../src/storage/models.ts';
 import { GuestRepository } from '../src/storage/repository.ts';
 import { obtainDeviceKey, unlockEncryptedConnection } from '../src/storage/security.ts';
+import { selectActivity, selectDashboard, selectRecord } from '../src/features/guest/selectors.ts';
+import { amountInput, installmentCount, parseAmount } from '../src/features/guest/forms.ts';
 import { fixture } from './sqlite-helper.ts';
 
 const create = (direction: 'borrowed' | 'lent' = 'borrowed', extras = {}): GuestCommand => ({
@@ -322,4 +324,84 @@ test('complete record creation retries persist only one record and one opening b
   assert.equal(first.recordId, again.recordId);
   assert.equal(again.snapshot.records.length, 1);
   assert.equal(again.snapshot.revisions.length, 1);
+});
+test('atomic partial settlements keep actual cash separate from borrowing forgiveness or lending write-off', async (t) => {
+  const { repository } = await fixture(t);
+  for (const direction of ['borrowed', 'lent'] as const) {
+    const created = await repository.execute(`create-${direction}`, create(direction));
+    const result = await repository.execute(`settle-${direction}`, { type: 'settle_record', recordId: created.recordId!, expectedVersion: 1,
+      effectiveOn: '2026-10-10', paid: components(800000), waived: components(200000), reason: 'Agreed partial settlement' });
+    const detail = view(result.snapshot, created.recordId!);
+    assert.equal(detail.ledger.outstandingMinor, 0);
+    assert.equal(detail.ledger.cashPaidMinor, 800000);
+    assert.equal(direction === 'borrowed' ? detail.ledger.forgivenMinor : detail.ledger.writtenOffMinor, 200000);
+    assert.equal(detail.history.length, 3);
+  }
+});
+
+test('incomplete or excessive settlements roll back both their cash and waived parts', async (t) => {
+  const { repository } = await fixture(t);
+  const original = await repository.execute('create', create());
+  for (const waived of [100000, 300000]) await assert.rejects(repository.execute(`bad-${waived}`, {
+    type: 'settle_record', recordId: original.recordId!, expectedVersion: 1, effectiveOn: '2026-10-10',
+    paid: components(800000), waived: components(waived), reason: 'Incorrect breakdown',
+  }));
+  assert.deepEqual(await repository.snapshot(), original.snapshot);
+});
+
+test('explicit signed adjustments and additional lending persist their reasons and exact component changes', async (t) => {
+  const { repository } = await fixture(t);
+  const original = await repository.execute('create', create('lent'));
+  let result = await repository.execute('advance', { type: 'post_entry', recordId: original.recordId!, expectedVersion: 1,
+    kind: 'advance', effectiveOn: '2026-10-10', components: components(200000) });
+  result = await repository.execute('adjust', { type: 'post_entry', recordId: original.recordId!, expectedVersion: 2,
+    kind: 'adjustment', effectiveOn: '2026-10-11', components: components(-10000), reason: 'Opening statement reconciliation' });
+  assert.equal(view(result.snapshot, original.recordId!).ledger.outstandingMinor, 1190000);
+  assert.equal(result.snapshot.revisions.find((entry) => entry.kind === 'adjustment')!.reason, 'Opening statement reconciliation');
+  assert.equal(view(result.snapshot, original.recordId!).ledger.cashPaidMinor, 0);
+});
+
+test('screen selectors show exact overdue remainders and immutable revisions, and never net receivables against debts', async (t) => {
+  const { repository } = await fixture(t);
+  const original = await repository.execute('create', create('borrowed', {
+    schedule: { firstDueOn: '2026-10-10', amountMinor: 500000, count: 2 },
+  }));
+  await repository.execute('lend', create('lent'));
+  const result = await repository.execute('partial', { type: 'post_entry', recordId: original.recordId!, expectedVersion: 1,
+    kind: 'payment', effectiveOn: '2026-10-10', components: components(300000) });
+  const detail = selectRecord(result.snapshot, original.recordId!, '2026-10-27')!;
+  assert.equal(detail.schedule.installments[0].remainingMinor, 200000);
+  assert.equal(detail.schedule.installments[0].status, 'overdue');
+  assert.equal(detail.schedule.installments[1].remainingMinor, 500000);
+  const dashboard = selectDashboard(result.snapshot, '2026-10-27');
+  assert.equal(dashboard.owedMinor, 700000);
+  assert.equal(dashboard.receivableMinor, 1000000);
+  assert.equal(dashboard.repaidMinor, 300000);
+  assert.equal(selectActivity(result.snapshot, original.recordId!).length, 2);
+});
+
+test('lifecycle events retain metadata snapshots and guest journal retains explicit currency and scale', async (t) => {
+  const { repository, database } = await fixture(t);
+  const created = await repository.execute('create', create());
+  const originalCategory = created.snapshot.records[0].categoryId;
+  const custom = await repository.execute('category', { type: 'create_category', direction: 'borrowed', name: 'Changed category' });
+  const id = custom.snapshot.categories.find((category) => category.kind === 'custom')!.id;
+  const result = await repository.execute('reclassify', { type: 'assign_category', recordId: created.recordId!, expectedVersion: 1, categoryId: id });
+  const firstEvent = result.snapshot.recordEvents.find((event) => event.kind === 'created')!;
+  assert.equal(firstEvent.record.categoryId, originalCategory);
+  assert.equal(result.snapshot.records[0].categoryId, id);
+  const outbox = await database.read((sql) => sql.all<{ payload: string }>('SELECT payload FROM outbox'));
+  assert.ok(outbox.every((row) => JSON.parse(row.payload).currency === 'INR' && JSON.parse(row.payload).minorUnitScale === 2));
+});
+
+test('financial form parsing preserves every paisa and rejects ambiguous amounts/counts', () => {
+  assert.equal(parseAmount('-200.01', true), -20001);
+  assert.equal(parseAmount('', false, true), 0);
+  assert.equal(parseAmount(amountInput(Number.MAX_SAFE_INTEGER)), Number.MAX_SAFE_INTEGER);
+  assert.equal(parseAmount(amountInput(-12345), true), -12345);
+  assert.throws(() => parseAmount('1.005'));
+  assert.throws(() => parseAmount('1e3'));
+  assert.throws(() => installmentCount('1.5'));
+  assert.throws(() => installmentCount('601'));
+  assert.equal(installmentCount('12'), 12);
 });
