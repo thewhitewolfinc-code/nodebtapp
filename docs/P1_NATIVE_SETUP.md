@@ -22,19 +22,25 @@ Sources: [Expo 58 SQLite / SQLCipher](https://docs.expo.dev/versions/v58.0.0/sdk
 
 ## Current machine findings
 
-- Windows, Node 24.22.0 and npm 11.19.1 work.
-- An Android SDK exists at the standard `%LOCALAPPDATA%\Android\Sdk` location; it includes platform-tools, emulator and Android 36.1/37.0 platforms. It was not on the shell's initial PATH.
-- `android\gradlew.bat --version` fails: **JAVA_HOME is not set and no java command is available**.
-- `adb devices -l` found no connected devices.
-- `emulator -list-avds` found no configured virtual devices.
-- `emulator -accel-check` reports **Android Emulator hypervisor driver is not installed**.
-- No installed APK/IPA, physical-device taps, encrypted database file inspection, or native kill/relaunch test is claimed.
+Updated by the 27 October 2026 [technical audit](TECHNICAL_AUDIT.md); the earlier P1 environment snapshot is superseded.
 
-Completing an emulator setup may require administrator access, virtualization configuration and a restart. A connected Android phone avoids the emulator-driver requirement, but local compilation still needs a working JDK and Android build toolchain. These machine-level setup steps were not performed automatically.
+- Windows, Node 24.22.0 and npm 11.19.1 work.
+- Android Studio exists with OpenJDK JBR 25.0.3. User-level `JAVA_HOME` now points to `C:\Program Files\Android\Android Studio\jbr`; its bin directory was added to user PATH without removing existing entries. Reopen the IDE/terminal to inherit it.
+- `ANDROID_HOME` is configured to the existing `%LOCALAPPDATA%\Android\Sdk`; platform-tools was added to user PATH. Android platforms 36.1/37.0 are installed.
+- Gradle 9.4.1 launches successfully with JBR. Its requested Temurin 17.0.20.1 compilation toolchain was provisioned; NDK 27.1.12297006, Build-Tools 37.0.0 and CMake 3.22.1 were installed through the existing build using already accepted SDK licenses.
+- The user's Motorola edge 60 fusion (Android 17, arm64-v8a) is authorized in ADB. Expo Go 58.0.5 connects to Metro through both USB forwarding and Wi-Fi and renders the expected secure-storage requirement after the startup fix.
+- A `Medium_Phone` AVD is now configured and WHPX acceleration reports installed/usable. No emulator boot was needed or tested.
+- Consult the audit's native-build/result table for APK installation and encrypted runtime acceptance status. An Expo Go connection does not verify SQLCipher storage.
+
+### Windows C++ path-length correction
+
+The first real build reached Worklets C++ compilation but Ninja 1.10.2 (from CMake 3.22.1) failed creating long generated object paths. Windows `LongPathsEnabled` is already 1. Following [Expo's documented correction](https://docs.expo.dev/troubleshooting/windows-long-paths/), `app.config.ts` now selects CMake **3.31.6 only on Windows** through the SDK-compatible build-properties plugin. Linux/EAS/macOS keep their defaults. Do not move the repository or change packages/security policies to shorten paths.
+
+Install that exact CMake SDK package in Android Studio: Settings → Languages & Frameworks → Android SDK → SDK Tools → Show Package Details → CMake → **3.31.6**. The SDK Manager is prepared with only this additional package selected. Installation/rebuild verification is still pending. The downloaded SDK CLI was blocked by Windows Application Control; use the built-in Studio SDK Manager instead of disabling or bypassing the policy. After installation, `cmake\3.31.6\bin\ninja.exe --version` under the SDK should report the newer Ninja, and the native build must be retried.
 
 ## Option A — Local Android build
 
-1. Install/configure OpenJDK 17 (the installed React Native Gradle plugin uses JVM toolchain 17), and complete Android Studio/SDK setup following the [current Expo environment guide](https://docs.expo.dev/get-started/set-up-your-environment/). Gradle 9 requires JVM 17 or newer ([official runtime requirement](https://docs.gradle.org/current/userguide/upgrading_major_version_9.html)); verify `java -version` and `android\gradlew.bat --version` before building.
+1. Use the verified Android Studio Java on this machine, or configure an appropriate JDK on another machine following the [current Expo environment guide](https://docs.expo.dev/get-started/set-up-your-environment/). The installed React Native plugin requests JVM toolchain 17; distinguish its compilation toolchain from the Java used to launch Gradle. Verify `java -version` and `android\gradlew.bat --version` before building. Avoid reinstalling Java or changing Gradle versions solely because the terminal was opened before the environment settings changed.
 2. Set `JAVA_HOME` to the actual installed JDK directory. Set `ANDROID_HOME` to your SDK directory and add `platform-tools` to PATH. Do not use a placeholder path as an actual environment value.
 3. Connect and unlock an Android phone, enable USB debugging and approve its authorization prompt; confirm it appears in `adb devices -l`. Alternatively configure and start a compatible accelerated Android virtual device.
 4. From the existing `Nodebt` directory, run:

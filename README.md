@@ -9,6 +9,7 @@ P0's financial engine is retained. P1 now connects encrypted native SQLite persi
 - [P1 storage design](docs/P1_STORAGE.md)
 - [Native build setup and acceptance checklist](docs/P1_NATIVE_SETUP.md)
 - [Verification results and exact changed files](docs/P1_VERIFICATION.md)
+- [Technical audit and Android connectivity results](docs/TECHNICAL_AUDIT.md)
 
 ## Development
 
@@ -23,6 +24,10 @@ This generates app-only route declarations, checks application/test TypeScript, 
 ## Running the guest tracker
 
 SQLCipher requires a **native development build**. Expo Go and web deliberately show a storage requirement instead of persisting an unencrypted ledger.
+
+The technical audit verified Expo Go connectivity on a physical Android phone over USB and Wi-Fi. It also corrected eager native imports that previously crashed route loading before that explanation could appear. This does not add SQLCipher to Expo Go. `npm.cmd start` now explicitly targets the Nodebt development client.
+
+Java/Android SDK user environment settings have been configured on the audited Windows machine. Reopen the IDE/terminal to inherit them; check `java -version` and `adb devices -l`. See the audit for verified component versions and remaining native acceptance checks.
 
 After completing the JDK/Android SDK and device setup in [P1_NATIVE_SETUP.md](docs/P1_NATIVE_SETUP.md):
 

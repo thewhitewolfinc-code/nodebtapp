@@ -21,7 +21,7 @@ The full commercial MVP remains the target. Breaking development into milestones
 | APPROVED | Technology | Existing Expo 58 / React Native 0.88 / React 19.3 / TypeScript 6. No project reinitialization or framework migration. |
 | APPROVED | Starter checks repaired | Fixed the existing web tab ref type error and hydration lint error; installed Expo-compatible lint tools and Node test types. Application/test typecheck, lint and financial tests pass; see the verification checkpoint. |
 | APPROVED | P1 implementation | Encrypted native storage/configuration, real-SQLite-tested atomic guest commands, category access limits and mobile guest journeys implemented. Existing P0 engine preserved. |
-| BLOCKED | P1 native verification | Native SQLCipher/SecureStore and on-device UI/restart checks pending: missing Java/JAVA_HOME, no connected phone/configured emulator, missing emulator hypervisor driver. See P1_NATIVE_SETUP.md. |
+| BLOCKED | P1 native verification | Native SQLCipher/SecureStore and financial UI/restart acceptance remains pending. Java/SDK settings are repaired and Expo Go connectivity is verified on a physical Android phone. Native compilation exposed Windows Ninja long-path failure; the documented CMake upgrade is configured and awaits SDK installation/build verification. See TECHNICAL_AUDIT.md. |
 | BLOCKED | Live cloud integration only | No Supabase project configuration, OAuth setup, RLS policies, or deployed sync/deletion endpoints exist in this repo. Implement locally first; configure external accounts before enabling cloud behavior. |
 | BLOCKED | Live purchases/ads only | Store app identities, signing, RevenueCat products/webhooks, AdMob IDs and consent configuration are not configured. Sandbox validation precedes enabling production integrations. |
 | BLOCKED | Public release | Full financial fixtures, device QA, encrypted restore verification, isolation/deletion/sync tests, privacy disclosures, and dependency security review must pass. This does not block local development. |
@@ -45,7 +45,7 @@ The full commercial MVP remains the target. Breaking development into milestones
 - Existing Git history: initial commit `8d30e2b`; worktree was clean at review start.
 - Node `v24.22.0`, npm `11.19.1`; Windows PowerShell requires `npm.cmd` / `npx.cmd` with the current Restricted script policy.
 - Dependencies were already installed. Existing Expo-compatible package versions are retained.
-- P1 follow-up found the Android SDK and ADB at the standard LocalAppData location, outside the initial PATH/sandbox view. Java/JAVA_HOME is unavailable; Gradle fails before building. No device or AVD is configured/connected and emulator acceleration lacks its driver. Windows cannot run the iOS Simulator.
+- The earlier P1 environment snapshot is superseded by [TECHNICAL_AUDIT.md](TECHNICAL_AUDIT.md). Android Studio/JBR and the SDK exist; user-level Java/SDK/PATH settings are repaired. A physical Motorola Android 17 phone is authorized; Expo Go 58.0.5 connects over USB and Wi-Fi and correctly requires a development build. A configured AVD and working WHPX acceleration are also present. Windows cannot run the iOS Simulator.
 - Baseline TypeScript failed in `src/components/app-tabs.web.tsx`; baseline lint could not initialize offline because ESLint/config were absent. Both repairs are included in the first milestone, followed by fresh checks.
 - Expo CLI's transitive Zod vulnerability remains a tracked tooling risk: https://github.com/advisories/GHSA-mrhx-c7xc-m3w5 . Do not run `npm audit fix --force`, downgrade Expo, or force a different Zod major under the CLI. Recheck upstream before release.
 
@@ -71,13 +71,13 @@ The full commercial MVP remains the target. Breaking development into milestones
 ## Verification checkpoint
 
 - P0 engine files are unchanged; all original 30 financial tests pass.
-- Complete P1 check: **59 tests pass**, application/test TypeScript passes, Expo lint passes with no lint warnings.
+- Current audit check: **60 tests pass**, application/test TypeScript passes, Expo lint passes with no lint warnings. The extra test covers unsupported-client native-module startup failures.
 - Expo Doctor: **20/20 checks passed** after the native dependency/configuration additions.
-- Android prebuild: **passed**, generated SQLCipher flag true and auto-backup false. Android/iOS Hermes and web export: **passed**. No APK/IPA/device UI runtime pass is claimed.
+- Android prebuild: **passed**, generated SQLCipher flag true and auto-backup false, plus Windows-only CMake 3.31.6. Android/iOS Hermes and web export: **passed**. Expo Go's expected startup error screen is verified on a physical phone; no native financial-persistence pass is claimed yet.
 - Web opener rejects before browser storage access; exported web client code contains its rejection and excludes native device-key/database opener constants.
-- Native device encryption, UI keyboard/touch/accessibility and kill/relaunch verification: **BLOCKED** on native environment/target availability, as documented above.
+- Native device encryption, financial UI keyboard/touch/accessibility and kill/relaunch verification: **BLOCKED** pending CMake installation and successful native build/runtime verification, as documented in the technical audit.
 - Node test runner emits a non-failing module-type detection warning. Existing Expo CLI/Zod advisory and Expo lint-toolchain deprecation remain tracked maintenance/release risks; no force fix or SDK downgrade was performed.
-- Git history preserved with reviewable P1 commits. Only the five necessary Expo-native modules were added to runtime dependencies; no backend, ad, billing or Pro algorithm package was added.
+- Git history preserved with reviewable P1/audit commits. Five native modules were added in P1; the audit adds only the SDK-compatible build-properties plugin for the reproduced Windows build failure. No original package version was changed; no backend, ad, billing or Pro algorithm package was added.
 - See [P1_VERIFICATION.md](P1_VERIFICATION.md) for exact changed files and evidence; [P1_NATIVE_SETUP.md](P1_NATIVE_SETUP.md) provides the remaining native steps.
 
 ## Approved P1 category and audience correction

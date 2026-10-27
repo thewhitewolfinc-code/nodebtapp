@@ -2,6 +2,8 @@
 
 Reviewed 27 October 2026. **P1 code is implemented and automated checks pass. P1 is not fully signed off: native SQLCipher/SecureStore and installed-app journey verification are BLOCKED on native environment/target setup.** No subsequent integration/Pro milestone has started.
 
+**Subsequent audit:** this file preserves the original P1 evidence/manifest. [TECHNICAL_AUDIT.md](TECHNICAL_AUDIT.md) has newer results: 60 passing tests, repaired Java/SDK user environment, physical Android Expo Go connectivity over USB/Wi-Fi, corrected native-import startup handling and the Windows CMake/Ninja build diagnosis. The old machine findings below are historical, not a recommendation to reinstall Java or a hypervisor driver.
+
 ## Delivered
 
 - Both requirement documents were corrected before category UI implementation: Free 6 defaults + 3 custom categories per direction; Pro all 16 borrowing / 14 lending defaults and unlimited customs; retained categories/assignments after expiry. The mixed formal/informal borrowing and personal-lending audience and global architecture are explicit.
