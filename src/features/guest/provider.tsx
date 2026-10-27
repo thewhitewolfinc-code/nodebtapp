@@ -1,4 +1,3 @@
-import * as Crypto from 'expo-crypto';
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type PropsWithChildren } from 'react';
 import { ActivityIndicator, AppState } from 'react-native';
 
@@ -11,14 +10,16 @@ interface GuestContextValue {
   readonly snapshot: GuestSnapshot;
   readonly busy: boolean;
   readonly today: string;
+  readonly createOperationId: () => string;
   readonly execute: (operationId: string, command: GuestCommand) => Promise<CommandResult>;
 }
 const GuestContext = createContext<GuestContextValue | undefined>(undefined);
-interface GuestState { repository?: GuestRepository; snapshot?: GuestSnapshot; error?: string }
+interface GuestState { repository?: GuestRepository; snapshot?: GuestSnapshot; createOperationId?: () => string; error?: string }
 async function readGuestState(): Promise<GuestState> {
   try {
     const repository = await openGuestRepository();
-    return { repository, snapshot: await repository.snapshot() };
+    const { randomUUID } = await import('expo-crypto');
+    return { repository, snapshot: await repository.snapshot(), createOperationId: randomUUID };
   } catch (error) {
     return { error: error instanceof Error ? error.message : 'Encrypted storage is unavailable. Existing data was not reset.' };
   }
@@ -53,8 +54,8 @@ export function GuestProvider({ children }: PropsWithChildren) {
     <Card><Copy>{state.error}</Copy><Copy variant="caption">Use the Nodebt Android or iOS development build. Setup steps are in docs/P1_NATIVE_SETUP.md.</Copy></Card>
     <Button label="Retry opening storage" onPress={() => { setState({}); void readGuestState().then(setState); }} />
   </Page>;
-  if (!state.snapshot) return <Page title="Opening Nodebt"><ActivityIndicator /><Copy>Opening your encrypted ledger…</Copy></Page>;
-  return <GuestContext value={{ snapshot: state.snapshot, busy, today, execute }}>{children}</GuestContext>;
+  if (!state.snapshot || !state.createOperationId) return <Page title="Opening Nodebt"><ActivityIndicator /><Copy>Opening your encrypted ledger…</Copy></Page>;
+  return <GuestContext value={{ snapshot: state.snapshot, busy, today, execute, createOperationId: state.createOperationId }}>{children}</GuestContext>;
 }
 export function useGuest(): GuestContextValue {
   const value = useContext(GuestContext);
@@ -63,6 +64,7 @@ export function useGuest(): GuestContextValue {
 }
 /** Retain an operation ID across a failed retry; reset only after an acknowledged success. */
 export function useOperationId() {
+  const { createOperationId } = useGuest();
   const reference = useRef<string | undefined>(undefined);
-  return { get: () => reference.current ??= Crypto.randomUUID(), reset: () => { reference.current = undefined; } };
+  return { get: () => reference.current ??= createOperationId(), reset: () => { reference.current = undefined; } };
 }

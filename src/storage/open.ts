@@ -1,7 +1,5 @@
-import * as Crypto from 'expo-crypto';
-import { File } from 'expo-file-system';
-import * as SecureStore from 'expo-secure-store';
-import * as SQLite from 'expo-sqlite';
+import { isRunningInExpoGo } from 'expo';
+import type { SecureStoreOptions } from 'expo-secure-store';
 
 import { LocalDatabase, type SqlConnection } from './database.ts';
 import { GuestRepository } from './repository.ts';
@@ -9,9 +7,6 @@ import { obtainDeviceKey, StorageSecurityError, unlockEncryptedConnection } from
 
 const DATABASE_NAME = 'nodebt-guest-v1.db';
 const KEY_NAME = 'nodebt.database.key.v1';
-const secureOptions: SecureStore.SecureStoreOptions = {
-  keychainService: 'nodebt.device.database.v1', keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
-};
 let opening: Promise<GuestRepository> | undefined;
 
 export function localToday(): string {
@@ -19,6 +14,19 @@ export function localToday(): string {
   return `${String(now.getFullYear()).padStart(4, '0')}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 }
 async function createRepository(): Promise<GuestRepository> {
+  // Expo Go cannot contain our SQLCipher build configuration. Reject before creating
+  // a device key or opening a database; keep the cipher_version check for stale builds.
+  if (isRunningInExpoGo()) {
+    throw new StorageSecurityError('Expo Go cannot run the encrypted Nodebt tracker. Install the Nodebt Android or iOS development build, then connect it to the development server.');
+  }
+  // Native imports can throw during module evaluation in unsupported/stale clients.
+  // Load inside the startup error boundary so Router still loads its screens.
+  const [Crypto, { File }, SecureStore, SQLite] = await Promise.all([
+    import('expo-crypto'), import('expo-file-system'), import('expo-secure-store'), import('expo-sqlite'),
+  ]);
+  const secureOptions: SecureStoreOptions = {
+    keychainService: 'nodebt.device.database.v1', keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
+  };
   if (!await SecureStore.isAvailableAsync()) throw new StorageSecurityError('Secure device key storage is unavailable. No ledger was opened.');
   const key = await obtainDeviceKey({
     getKey: () => SecureStore.getItemAsync(KEY_NAME, secureOptions),
