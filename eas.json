@@ -1,0 +1,14 @@
+{
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "env": { "NODEBT_APP_ID": "app.nodebt.development" },
+      "android": { "buildType": "apk" }
+    },
+    "development-simulator": {
+      "extends": "development",
+      "ios": { "simulator": true }
+    }
+  }
+}

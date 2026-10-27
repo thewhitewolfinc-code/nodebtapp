@@ -1,8 +1,18 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "types": ["node"]
+    "types": [
+      "node"
+    ]
   },
-  "include": ["src/domain/**/*.ts", "tests/**/*.ts"],
-  "exclude": []
+  "include": [
+    "src/domain/**/*.ts",
+    "tests/**/*.ts",
+    "src/storage/**/*.ts",
+    "src/config/**/*.ts"
+  ],
+  "exclude": [
+    "src/storage/open.ts",
+    "src/storage/open.web.ts"
+  ]
 }
