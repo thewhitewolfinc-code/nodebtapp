@@ -54,3 +54,21 @@ Join our community of developers creating universal apps.
 
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+
+## Nodebt implementation
+
+Development readiness and approved decisions: [docs/DEVELOPMENT_READINESS.md](docs/DEVELOPMENT_READINESS.md).
+Prioritized delivery milestones: [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md).
+
+The first milestone adds the tested financial domain in `src/domain`. It is not yet connected to the Expo starter screens or persistent storage. No cloud service, real purchase, ad placement, or production financial-data storage is enabled.
+
+On Windows PowerShell, use the `.cmd` launchers:
+
+```powershell
+npm.cmd run check
+npx.cmd expo start
+```
+
+`check` runs application/test typechecking, Expo ESLint, and Node's built-in financial tests. The validated development runtime is Node 24.22.0. The standalone domain tests use TypeScript stripping, with no additional test framework. CI uses Node 24 and runs the same checks.
+
+Do not run `reset-project` or `npm audit fix --force` as part of this implementation. The existing Expo CLI/Zod advisory is tracked in the readiness review.
