@@ -405,3 +405,39 @@ test('financial form parsing preserves every paisa and rejects ambiguous amounts
   assert.throws(() => installmentCount('601'));
   assert.equal(installmentCount('12'), 12);
 });
+
+test('explicit installment allocations persist through guest payments and corrections without replacing prior revisions', async (t) => {
+  const { repository } = await fixture(t);
+  const created = await repository.execute('create', create('borrowed', {
+    schedule: { firstDueOn: '2026-10-10', amountMinor: 500000, count: 2 },
+  }));
+  const installments = created.snapshot.installments.slice().sort((a, b) => a.dueOn.localeCompare(b.dueOn));
+  let result = await repository.execute('explicit', { type: 'post_entry', recordId: created.recordId!, expectedVersion: 1,
+    kind: 'payment', effectiveOn: '2026-10-10', components: components(300000),
+    allocations: [{ installmentId: installments[1].id, amountMinor: 300000 }] });
+  let detail = selectRecord(result.snapshot, created.recordId!, '2026-10-27')!;
+  assert.equal(detail.schedule.installments[0].remainingMinor, 500000);
+  assert.equal(detail.schedule.installments[1].remainingMinor, 200000);
+  const payment = detail.entries.find((entry) => entry.kind === 'payment')!;
+  result = await repository.execute('correct-explicit', { type: 'correct_entry', recordId: created.recordId!, expectedVersion: 2,
+    entryId: payment.id, expectedRevisionId: payment.revisionId, effectiveOn: '2026-10-10', components: components(300000),
+    reason: 'Correct contractual allocation', state: 'posted', allocations: [{ installmentId: installments[0].id, amountMinor: 300000 }] });
+  detail = selectRecord(result.snapshot, created.recordId!, '2026-10-27')!;
+  assert.equal(detail.schedule.installments[0].remainingMinor, 200000);
+  assert.equal(detail.schedule.installments[1].remainingMinor, 500000);
+  assert.equal(detail.history.find((entry) => entry.revisionId === payment.revisionId)!.allocations![0].installmentId, installments[1].id);
+});
+
+test('invalid or foreign installment allocations cannot partially commit a guest payment', async (t) => {
+  const { repository } = await fixture(t);
+  const created = await repository.execute('create', create('borrowed', {
+    schedule: { firstDueOn: '2026-10-10', amountMinor: 500000, count: 2 },
+  }));
+  const common = { type: 'post_entry' as const, recordId: created.recordId!, expectedVersion: 1,
+    kind: 'payment' as const, effectiveOn: '2026-10-10', components: components(600000) };
+  await assert.rejects(repository.execute('over-allocate', { ...common,
+    allocations: [{ installmentId: created.snapshot.installments[0].id, amountMinor: 600000 }] }));
+  await assert.rejects(repository.execute('foreign', { ...common,
+    allocations: [{ installmentId: 'another-records-installment', amountMinor: 600000 }] }));
+  assert.deepEqual(await repository.snapshot(), created.snapshot);
+});

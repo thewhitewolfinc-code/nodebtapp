@@ -28,6 +28,9 @@ export default function EntryForm() {
   const [effectiveOn, setEffectiveOn] = useState(prior?.effectiveOn ?? today);
   const [reason, setReason] = useState('');
   const [principalOnly, setPrincipalOnly] = useState(prior?.paymentMode === 'principal_only');
+  const [manualAllocation, setManualAllocation] = useState(prior?.allocations !== undefined);
+  const [allocationInputs, setAllocationInputs] = useState<Record<string, string>>(() => Object.fromEntries(
+    (detail?.schedule.installments ?? []).map((row) => [row.id, amountInput(prior?.allocations?.find((allocation) => allocation.installmentId === row.id)?.amountMinor ?? 0)])));
   const [recognizeCharges, setRecognizeCharges] = useState(false);
   const [newInterest, setNewInterest] = useState('0.00');
   const [newFees, setNewFees] = useState('0.00');
@@ -48,12 +51,15 @@ export default function EntryForm() {
       const amounts = { principalMinor: parseAmount(principal, signed, true), interestMinor: parseAmount(interest, signed, true), feesMinor: parseAmount(fees, signed, true) };
       const requiresReason = !!prior || ['adjustment', 'forgiveness', 'write_off', 'settlement'].includes(kind);
       if (requiresReason && !reason.trim()) throw new Error('Enter a reason that will be preserved with this financial change.');
+      const allocations = manualAllocation && !principalOnly ? detail!.schedule.installments.map((row) => ({
+        installmentId: row.id, amountMinor: parseAmount(allocationInputs[row.id] ?? '', false, true),
+      })).filter((allocation) => allocation.amountMinor > 0) : undefined;
       const common = { recordId: record.id, expectedVersion: initialVersion.current!, effectiveOn, components: amounts, reason };
       if (prior) setPrepared({ ...common, type: 'correct_entry', entryId: prior.id, expectedRevisionId: initialParent.current!,
-        state, paymentMode: prior.kind === 'payment' ? principalOnly ? 'principal_only' : 'installment' : undefined });
+        state, allocations, paymentMode: prior.kind === 'payment' ? principalOnly ? 'principal_only' : 'installment' : undefined });
       else if (kind === 'settlement') setPrepared({ type: 'settle_record', recordId: record.id, expectedVersion: initialVersion.current!, effectiveOn,
-        paid: amounts, waived: { principalMinor: parseAmount(waivedPrincipal, false, true), interestMinor: parseAmount(waivedInterest, false, true), feesMinor: parseAmount(waivedFees, false, true) }, reason });
-      else setPrepared({ ...common, type: 'post_entry', kind: kind as Exclude<EntryKind, 'opening_balance'>,
+        paid: amounts, allocations, waived: { principalMinor: parseAmount(waivedPrincipal, false, true), interestMinor: parseAmount(waivedInterest, false, true), feesMinor: parseAmount(waivedFees, false, true) }, reason });
+      else setPrepared({ ...common, allocations, type: 'post_entry', kind: kind as Exclude<EntryKind, 'opening_balance'>,
         paymentMode: kind === 'payment' ? principalOnly ? 'principal_only' : 'installment' : undefined,
         newInterestMinor: recognizeCharges && !principalOnly ? parseAmount(newInterest, false, true) : 0,
         newFeesMinor: recognizeCharges && !principalOnly ? parseAmount(newFees, false, true) : 0 });
@@ -77,6 +83,9 @@ export default function EntryForm() {
       {kind === 'settlement' && <Copy>Separately waived: principal {waivedPrincipal} · interest {waivedInterest} · fees {waivedFees} {launch.currency}</Copy>}
       {recognizeCharges && !principalOnly && <Copy>Explicit new charges: interest {newInterest} · fees {newFees} {launch.currency}. These are saved atomically with the payment.</Copy>}
       {principalOnly && <Copy>Principal-only prepayment. Scheduled installments remain separate.</Copy>}
+      {manualAllocation && !principalOnly && <><Copy>Explicit installment allocation:</Copy>
+        {detail.schedule.installments.filter((row) => parseAmount(allocationInputs[row.id] ?? '', false, true) > 0).map((row) =>
+          <Copy key={row.id}>{row.dueOn}: {allocationInputs[row.id]} {launch.currency}</Copy>)}</>}
       {prepared.type === 'correct_entry' && <Copy>Correction: {prepared.state === 'void' ? 'Void this transaction' : 'Save / restore revised transaction'}. Prior revisions remain in history.</Copy>}
       {reason && <Copy>Reason: {reason}</Copy>}
       <Button label={busy ? 'Saving…' : 'Confirm and save'} disabled={busy || !!record.closedOn} onPress={() => { void save(); }} />
@@ -93,7 +102,7 @@ export default function EntryForm() {
         <Field label={`Fees waived (${launch.currency})`} value={waivedFees} onChangeText={setWaivedFees} keyboardType="decimal-pad" editable={!busy} />
       </>}
       {kind === 'payment' && record.allowsPrincipalOnlyPrepayment && <Toggle label="Principal-only prepayment" value={principalOnly} disabled={busy} onChange={(value) => {
-        setPrincipalOnly(value); if (value) { setInterest('0.00'); setFees('0.00'); setRecognizeCharges(false); }
+        setPrincipalOnly(value); if (value) { setManualAllocation(false); setInterest('0.00'); setFees('0.00'); setRecognizeCharges(false); }
       }} />}
       {kind === 'payment' && !prior && !principalOnly && <>
         <Toggle label="Explicitly record new interest / fees with this payment" value={recognizeCharges} onChange={setRecognizeCharges} disabled={busy} />
@@ -103,9 +112,16 @@ export default function EntryForm() {
           <Copy variant="caption">These charges increase the recorded interest/fee balances before the split payment is applied. This never infers lender interest automatically.</Copy>
         </>}
       </>}
+      {['payment', 'settlement'].includes(kind) && !principalOnly && detail.schedule.installments.length > 0 && <>
+        <Toggle label="Allocate cash to specific installments" value={manualAllocation} onChange={setManualAllocation} disabled={busy} />
+        <Copy variant="caption">Default: oldest unpaid installment first. Use explicit amounts if your agreement allocates differently. Unassigned cash does not complete an installment.</Copy>
+        {manualAllocation && detail.schedule.installments.map((row) => <Field key={row.id} label={`Cash assigned to ${row.dueOn} (${launch.currency})`}
+          value={allocationInputs[row.id] ?? '0.00'} onChangeText={(value) => setAllocationInputs((previous) => ({ ...previous, [row.id]: value }))}
+          keyboardType="decimal-pad" editable={!busy} />)}
+      </>}
       <Field label="Effective date" value={effectiveOn} onChangeText={setEffectiveOn} placeholder="YYYY-MM-DD" editable={!busy && kind !== 'opening_balance'} />
       <Field label={prior || ['adjustment', 'forgiveness', 'write_off', 'settlement'].includes(kind) ? 'Reason (required)' : 'Note (optional)'} value={reason} onChangeText={setReason} maxLength={1000} multiline editable={!busy} />
-      {signed && <Copy variant="caption">Enter signed differences, e.g. −200 to reduce a component. The balance is never overwritten. Each component must remain nonnegative.</Copy>}
+      {signed && <Copy variant="caption">Enter signed differences, e.g. -200 to reduce a component. The balance is never overwritten. Each component must remain nonnegative.</Copy>}
       <Button label={prior?.state === 'void' ? 'Review restoration / correction' : 'Review entry'} disabled={busy || !!record.closedOn} onPress={() => review('posted')} />
       {prior && prior.kind !== 'opening_balance' && prior.state !== 'void' && <Button label="Review voiding this transaction" secondary disabled={busy || !!record.closedOn} onPress={() => review('void')} />}
     </>}

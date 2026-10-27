@@ -1,6 +1,6 @@
 import type { Category } from '../domain/categories.ts';
 import type { Installment } from '../domain/installments.ts';
-import type { Components, DebtRecord, EntryDraft, EntryRevision } from '../domain/ledger.ts';
+import type { Components, DebtRecord, EntryDraft, EntryRevision, InstallmentAllocation } from '../domain/ledger.ts';
 
 export interface GuestRecord extends DebtRecord {
   readonly categoryId: string;
@@ -43,13 +43,13 @@ export type GuestCommand =
   | { readonly type: 'post_entry'; readonly recordId: string; readonly expectedVersion: number;
       readonly kind: Exclude<EntryDraft['kind'], 'opening_balance'>; readonly effectiveOn: string;
       readonly components: Components; readonly reason?: string; readonly paymentMode?: EntryDraft['paymentMode'];
-      readonly newInterestMinor?: number; readonly newFeesMinor?: number }
+      readonly newInterestMinor?: number; readonly newFeesMinor?: number; readonly allocations?: readonly InstallmentAllocation[] }
   | { readonly type: 'settle_record'; readonly recordId: string; readonly expectedVersion: number; readonly effectiveOn: string;
-      readonly paid: Components; readonly waived: Components; readonly reason: string }
+      readonly paid: Components; readonly waived: Components; readonly reason: string; readonly allocations?: readonly InstallmentAllocation[] }
   | { readonly type: 'correct_entry'; readonly recordId: string; readonly expectedVersion: number;
       readonly entryId: string; readonly expectedRevisionId: string; readonly effectiveOn: string;
       readonly components: Components; readonly reason: string; readonly state: 'posted' | 'void';
-      readonly paymentMode?: EntryDraft['paymentMode'] }
+      readonly paymentMode?: EntryDraft['paymentMode']; readonly allocations?: readonly InstallmentAllocation[] }
   | { readonly type: 'record_action'; readonly recordId: string; readonly expectedVersion: number;
       readonly action: 'close' | 'reopen' | 'archive' | 'unarchive' }
   | { readonly type: 'assign_category'; readonly recordId: string; readonly expectedVersion: number; readonly categoryId: string };

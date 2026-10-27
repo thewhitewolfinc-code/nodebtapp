@@ -154,11 +154,12 @@ export class GuestRepository {
           requireInput(entryTotal(command.paid) > 0 && entryTotal(command.waived) > 0, 'A partial settlement requires both actual cash and a waived amount.');
           requireInput(record.interestMode !== 'interest_free' || (command.paid.interestMinor === 0 && command.waived.interestMinor === 0), 'Interest-free records cannot settle interest.');
           history = postEntry(record, history, { ...command.paid, id: this.services.id(), recordId: record.id,
-            kind: 'payment', effectiveOn: command.effectiveOn, paymentMode: 'installment', reason: command.reason }, context());
+            kind: 'payment', effectiveOn: command.effectiveOn, paymentMode: 'installment', allocations: command.allocations, reason: command.reason }, context());
           history = postEntry(record, history, { ...command.waived, id: this.services.id(), recordId: record.id,
             kind: record.direction === 'borrowed' ? 'forgiveness' : 'write_off', effectiveOn: command.effectiveOn, reason: command.reason }, context());
           requireInput(projectLedger(record, history).outstandingMinor === 0, 'Settlement must clear the recorded balance. Review the cash and waived components.');
         } else if (command.type === 'post_entry') {
+          requireInput(command.kind === 'payment' || command.allocations === undefined, 'Only payments can allocate cash to installments.');
           const newInterest = command.newInterestMinor ?? 0;
           const newFees = command.newFeesMinor ?? 0;
           assertMinorUnits(newInterest);
@@ -176,14 +177,15 @@ export class GuestRepository {
           }, context());
           history = postEntry(record, history, { ...command.components, id: this.services.id(), recordId: record.id,
             kind: command.kind, effectiveOn: command.effectiveOn, reason: command.reason,
-            paymentMode: command.kind === 'payment' ? command.paymentMode ?? 'installment' : undefined }, context());
+            paymentMode: command.kind === 'payment' ? command.paymentMode ?? 'installment' : undefined, allocations: command.allocations }, context());
         } else if (command.type === 'correct_entry') {
           const previous = originalHistory.filter((entry) => entry.id === command.entryId).sort((a, b) => b.revision - a.revision)[0];
           requireInput(previous, 'Transaction not found.');
           requireInput(current.interestMode !== 'interest_free' || command.components.interestMinor === 0,
             'Interest-free records cannot record interest.');
           const replacement: EntryDraft = { ...previous, ...command.components, effectiveOn: command.effectiveOn,
-            reason: command.reason, paymentMode: previous.kind === 'payment' ? command.paymentMode ?? previous.paymentMode : undefined };
+            reason: command.reason, paymentMode: previous.kind === 'payment' ? command.paymentMode ?? previous.paymentMode : undefined,
+            allocations: command.allocations };
           history = correctEntry(record, history, command.entryId, command.expectedRevisionId, replacement, context(), command.state);
         } else if (command.type === 'record_action') {
           if (command.action === 'close') record = { ...record, ...closeRecord(record, history, today) };
