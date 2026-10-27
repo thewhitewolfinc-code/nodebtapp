@@ -1,74 +1,49 @@
-# Welcome to your Expo app 👋
+# Nodebt
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Private borrowing and lending tracking built in the existing Expo 58 / React Native / TypeScript project.
 
-## Get started
+P0's financial engine is retained. P1 now connects encrypted native SQLite persistence, guest onboarding, Home/Records/Activity/Insights/Settings, categories, repayments/collections, financial revisions, explicit adjustments, settlement and record lifecycle journeys. **Native device verification is still pending; this is not a release-ready build.**
 
-1. Install dependencies
+- [Approved decisions and readiness](docs/DEVELOPMENT_READINESS.md)
+- [Implementation milestones](docs/IMPLEMENTATION_PLAN.md)
+- [P1 storage design](docs/P1_STORAGE.md)
+- [Native build setup and acceptance checklist](docs/P1_NATIVE_SETUP.md)
+- [Verification results and exact changed files](docs/P1_VERIFICATION.md)
 
-   ```bash
-   npm install
-   ```
+## Development
 
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **src/app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **example** directory and create a blank **src/app** directory where you can start developing.
-
-### Other setup steps
-
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
-
-## Nodebt implementation
-
-Development readiness and approved decisions: [docs/DEVELOPMENT_READINESS.md](docs/DEVELOPMENT_READINESS.md).
-Prioritized delivery milestones: [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md).
-
-The first milestone adds the tested financial domain in `src/domain`. It is not yet connected to the Expo starter screens or persistent storage. No cloud service, real purchase, ad placement, or production financial-data storage is enabled.
-
-On Windows PowerShell, use the `.cmd` launchers:
+Use the existing `Nodebt` directory. Validated runtime: Node 24.22.0 / npm 11.19.1. PowerShell's current script policy requires the `.cmd` launchers.
 
 ```powershell
 npm.cmd run check
-npx.cmd expo start
 ```
 
-`check` runs application/test typechecking, Expo ESLint, and Node's built-in financial tests. The validated development runtime is Node 24.22.0. The standalone domain tests use TypeScript stripping, with no additional test framework. CI uses Node 24 and runs the same checks.
+This generates app-only route declarations, checks application/test TypeScript, runs Expo ESLint, and executes the financial and real-SQLite repository tests. Tests use isolated synthetic temporary files; they do not create demo financial records in the application. The original 30 financial tests remain unchanged.
 
-Do not run `reset-project` or `npm audit fix --force` as part of this implementation. The existing Expo CLI/Zod advisory is tracked in the readiness review.
+## Running the guest tracker
+
+SQLCipher requires a **native development build**. Expo Go and web deliberately show a storage requirement instead of persisting an unencrypted ledger.
+
+After completing the JDK/Android SDK and device setup in [P1_NATIVE_SETUP.md](docs/P1_NATIVE_SETUP.md):
+
+```powershell
+npm.cmd run android
+```
+
+For subsequent JS-only development sessions with the native app already installed:
+
+```powershell
+npm.cmd run start:dev
+```
+
+Use the EAS development profiles described in the setup guide if local native compilation is unavailable. iOS requires a signed device build or a macOS simulator environment. App identities are development-only; no production app registration or cloud service has been created.
+
+## Data and milestone boundaries
+
+Free supports 6 default categories and 3 custom categories **per direction**. Pro policy supports all 16 borrowing / 14 lending defaults and unlimited custom categories; retained categories and assignments survive expiry. P1 runs guest Free policy and tests Pro/expiry rules without a paid unlock toggle.
+
+Records store an explicit currency and money scale. Initial entry/validation uses INR. Formal loans, credit cards, BNPL, informal borrowing and personal lending share the validated ledger; unsupported interest terms are entered explicitly rather than inferred.
+
+Guest data stays on this device. Do not uninstall/clear an installation containing real records: encrypted export/restore and cloud recovery are later milestones. Keys, financial records and sessions are not stored in browser localStorage. There is no plaintext or mock-financial-data fallback.
+
+Supabase, RevenueCat, AdMob, reminders, App Lock, encrypted file backups and Pro algorithms are not enabled in P1. The original starter screens/tab source are retained under `src/legacy` for reference. Do not run the starter `reset-project` command or `npm audit fix --force` during this implementation.

@@ -20,6 +20,8 @@ The full commercial MVP remains the target. Breaking development into milestones
 | APPROVED | Privacy and recovery | Device reminders; generic notification content by default; free optional device App Lock; CSV plus authenticated encrypted password-protected backups; no password recovery/backdoor; export before account deletion. |
 | APPROVED | Technology | Existing Expo 58 / React Native 0.88 / React 19.3 / TypeScript 6. No project reinitialization or framework migration. |
 | APPROVED | Starter checks repaired | Fixed the existing web tab ref type error and hydration lint error; installed Expo-compatible lint tools and Node test types. Application/test typecheck, lint and financial tests pass; see the verification checkpoint. |
+| APPROVED | P1 implementation | Encrypted native storage/configuration, real-SQLite-tested atomic guest commands, category access limits and mobile guest journeys implemented. Existing P0 engine preserved. |
+| BLOCKED | P1 native verification | Native SQLCipher/SecureStore and on-device UI/restart checks pending: missing Java/JAVA_HOME, no connected phone/configured emulator, missing emulator hypervisor driver. See P1_NATIVE_SETUP.md. |
 | BLOCKED | Live cloud integration only | No Supabase project configuration, OAuth setup, RLS policies, or deployed sync/deletion endpoints exist in this repo. Implement locally first; configure external accounts before enabling cloud behavior. |
 | BLOCKED | Live purchases/ads only | Store app identities, signing, RevenueCat products/webhooks, AdMob IDs and consent configuration are not configured. Sandbox validation precedes enabling production integrations. |
 | BLOCKED | Public release | Full financial fixtures, device QA, encrypted restore verification, isolation/deletion/sync tests, privacy disclosures, and dependency security review must pass. This does not block local development. |
@@ -43,14 +45,14 @@ The full commercial MVP remains the target. Breaking development into milestones
 - Existing Git history: initial commit `8d30e2b`; worktree was clean at review start.
 - Node `v24.22.0`, npm `11.19.1`; Windows PowerShell requires `npm.cmd` / `npx.cmd` with the current Restricted script policy.
 - Dependencies were already installed. Existing Expo-compatible package versions are retained.
-- No Android SDK/ADB, Java executable, or `ANDROID_HOME` / `JAVA_HOME` was detected through the checked command/environment paths. Native device/build readiness remains to be established. Windows cannot run Apple's iOS Simulator; use physical iOS hardware and an EAS development build.
+- P1 follow-up found the Android SDK and ADB at the standard LocalAppData location, outside the initial PATH/sandbox view. Java/JAVA_HOME is unavailable; Gradle fails before building. No device or AVD is configured/connected and emulator acceleration lacks its driver. Windows cannot run the iOS Simulator.
 - Baseline TypeScript failed in `src/components/app-tabs.web.tsx`; baseline lint could not initialize offline because ESLint/config were absent. Both repairs are included in the first milestone, followed by fresh checks.
 - Expo CLI's transitive Zod vulnerability remains a tracked tooling risk: https://github.com/advisories/GHSA-mrhx-c7xc-m3w5 . Do not run `npm audit fix --force`, downgrade Expo, or force a different Zod major under the CLI. Recheck upstream before release.
 
 ## Remaining mandatory gates, not another questionnaire
 
 - Choose/test the exact supported forecasting contract models before shipping calculators; lender-exact variable/daily interest and penalties stay unsupported until implemented and verified.
-- Wire and verify encrypted on-device storage and the versioned import/backup schema before storing real financial data.
+- Complete native SQLCipher/SecureStore verification before treating P1 as signed off; the guards/configuration and SQLite repository are implemented. Complete versioned encrypted file backup/restore in P2.
 - Configure Google/Apple developer identities and services before their integration tests; native App Lock, ads, purchases and SQLCipher require native development-build testing.
 - Validate provider cost limits before public launch. The agreed Supabase Pro base budget uses the $25/month target before taxes/extras; paid build services, store registration, monitoring overages and revenue-based fees are separate costs to track.
 - Privacy/retention disclosures and ad consent need launch-market review. No claim of legal compliance is made by this engineering review.
@@ -68,15 +70,15 @@ The full commercial MVP remains the target. Breaking development into milestones
 
 ## Verification checkpoint
 
-- Expo Doctor: **20/20 checks passed**.
-- Application and standalone test TypeScript checks: **passed**.
-- Expo ESLint: **passed**, including repaired starter issues.
-- Financial domain tests: **30 passed**.
-- Existing app web/server export: **passed** with Expo 58.
-- Git history and existing runtime dependency declarations preserved; only development tooling dependencies added.
-- Native device tests, encryption, cloud integration and purchase/advertising integration have **not** been completed. The app still presents its starter screens; financial domain code is not yet connected to persistence or UI.
-- The standalone Node test runner emits a non-failing module-type detection warning; application module configuration is unchanged. Expo currently resolves ESLint 9 for its lint toolchain; npm warns that this major is deprecated, so a compatible lint-toolchain update remains maintenance work.
-- GitHub Actions workflow added with Node 24 and pinned current official action releases; its hosted execution awaits a push/PR.
+- P0 engine files are unchanged; all original 30 financial tests pass.
+- Complete P1 check: **59 tests pass**, application/test TypeScript passes, Expo lint passes with no lint warnings.
+- Expo Doctor: **20/20 checks passed** after the native dependency/configuration additions.
+- Android prebuild: **passed**, generated SQLCipher flag true and auto-backup false. Android/iOS Hermes and web export: **passed**. No APK/IPA/device UI runtime pass is claimed.
+- Web opener rejects before browser storage access; exported web client code contains its rejection and excludes native device-key/database opener constants.
+- Native device encryption, UI keyboard/touch/accessibility and kill/relaunch verification: **BLOCKED** on native environment/target availability, as documented above.
+- Node test runner emits a non-failing module-type detection warning. Existing Expo CLI/Zod advisory and Expo lint-toolchain deprecation remain tracked maintenance/release risks; no force fix or SDK downgrade was performed.
+- Git history preserved with reviewable P1 commits. Only the five necessary Expo-native modules were added to runtime dependencies; no backend, ad, billing or Pro algorithm package was added.
+- See [P1_VERIFICATION.md](P1_VERIFICATION.md) for exact changed files and evidence; [P1_NATIVE_SETUP.md](P1_NATIVE_SETUP.md) provides the remaining native steps.
 
 ## Approved P1 category and audience correction
 

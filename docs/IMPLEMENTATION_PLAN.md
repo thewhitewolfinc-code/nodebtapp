@@ -5,7 +5,7 @@ Approved product decisions are recorded in [DEVELOPMENT_READINESS.md](DEVELOPMEN
 ## Architecture and defaults
 
 - Keep Expo 58, React Native 0.88, TypeScript 6 and Expo Router. Non-route domain, storage, integration and UI code stays outside `src/app`. Android/iOS are production targets; browser preview is not a public web product.
-- Use a pure TypeScript financial domain with integer paise, immutable transaction revisions, deterministic ledger projections, calendar-date schedules and separate forecasting inputs/results. The current implementation begins here.
+- Use a pure TypeScript financial domain with integer paise, immutable transaction revisions, deterministic ledger projections, calendar-date schedules and separate forecasting inputs/results. The validated P0 engine remains the calculation boundary.
 - Next add transactional SQLite storage on device. Use a versioned migration history; store original records and all revisions, never just cached balances. Atomically write a financial command and its outbox item. Rebuild read models from validated transactions.
 - Protect native storage using SQLCipher with a random device key in SecureStore, tested in development builds. Fail visibly if the required encryption is unavailable. Do not persist real financial records in browser localStorage or silently fall back to an unencrypted database. A browser-only preview may use clearly labeled, ephemeral sample data later.
 - Use Supabase Auth/Postgres/Edge Functions for the managed backend, with RLS ownership policies on every exposed user table, scoped server operations and no service keys in the app. Use Google and Apple sign-in, explicit identity linking, and account-scoped local data. Choose an India-near region initially and expand based on measured needs; do not add global replication prematurely.
@@ -20,7 +20,7 @@ Deliver validated INR parsing/formatting and checked arithmetic; record/opening 
 
 Acceptance: `npm.cmd run check` passes. Tests cover principal/interest splits, partial/overdue installments, arbitrary additional charges, invalid dates, month-end/leap-year handling, safe-integer limits, duplicate/stale writes, correction/void/restore, settlement versus cash, archived balances, and principal-only prepayments. SDK compatibility passes Expo Doctor. No UI can bypass domain validation when connected later.
 
-## P1 — Persistent guest tracker and primary journeys (next)
+## P1 — Encrypted local persistence and guest tracking journeys (code implemented; native verification pending)
 
 1. Add SDK-compatible SQLite/SecureStore dependencies, encrypted native development-build configuration, schema version 1 and a transactional repository adapter. Test restart, rollback, interrupted writes, corruption handling and migration recovery before accepting real data.
 2. Define records with title, direction, kind, counterparty label, category, INR currency, tracking start, terms/model eligibility, archive/closure metadata and stable IDs. Keep person names private labels with no contacts permission or counterpart invitations. Set flags for unknown interest breakdown/unsupported contracts; planner admission requires validated principal/terms.
@@ -28,7 +28,7 @@ Acceptance: `npm.cmd run check` passes. Tests cover principal/interest splits, p
 4. Extend the existing Router into Home, Records, Activity, Insights and Settings. Preserve starter files/history while replacing their entry points deliberately. New users see a short introduction, guest/sign-in choices and guided first record with skip; returning users reach Home after optional App Lock.
 5. Home keeps liabilities and receivables separate; Records supports direction/category/status search and filters; detail shows component balances, due schedule and full activity. Provide explicit repayment/collection, charge, adjustment, forgiveness/write-off and partial-settlement forms. Never show forgiveness as repayment progress.
 6. Payment form reviews principal/interest/fees and installment versus principal-only allocation. Explicitly record any newly recognized charge together with its payment. Keep contracted future installments unchanged unless a supported rule recalculates and the user reviews a proposed versioned schedule. Fee payments must not silently satisfy unrelated installments.
-7. Seed separate, versioned borrowing (16) and lending (14) catalogs with exactly 6 Free defaults in each direction. Treat category names as editable product defaults, not financial models. Free exposes exactly 6 borrowing defaults and 6 lending defaults and allows up to 3 custom categories per direction. Pro exposes all 16 borrowing defaults, all 14 lending defaults and unlimited custom categories. Expired Pro users retain existing custom categories and all historical assignments; a downgrade never deletes or relabels records. No destructive category deletion that orphans records.
+7. Seed separate, versioned borrowing (16) and lending (14) catalogs with exactly 6 Free defaults in each direction. Use stable direction-specific IDs; labels are launch defaults, not financial models. Default categories are read-only in P1, and catalog changes after release require a versioned migration. Free exposes exactly 6 borrowing defaults and 6 lending defaults and allows up to 3 custom categories per direction. Pro exposes all 16 borrowing defaults, all 14 lending defaults and unlimited custom categories. Expired Pro users retain existing custom categories and all historical assignments; a downgrade never deletes or relabels records. No destructive category deletion that orphans records.
 
 Acceptance: guest creates a debt and a receivable, records split/partial payments, restarts offline and sees exact same balances/history; missed payment leaves its unpaid portion overdue; edits reproject all affected views. Empty/loading/error states, screen-reader labels, adequate text scaling, tap targets and system light/dark support work. Begin with English and accessible system UI conventions; visual refinements do not block the ledger.
 
@@ -85,7 +85,13 @@ Development uses free tiers where suitable. Public Supabase Pro starts at $25/mo
 
 ## Current checkpoint
 
-The first code change implements the financial domain and repairs baseline development checks. SQLite persistence, product screens, cloud sync, calculators, App Lock, backups, notifications, purchases and ads are subsequent milestones and are not represented as already functional. See the readiness review's verification checkpoint for actual test/build results.
+P0 is preserved and P1 code is implemented: encrypted native storage/configuration, versioned migrations, transactional guest commands and revision history, category limits, five-tab navigation, onboarding, borrowing/lending forms, payments/collections, explicit adjustments, settlements, and closure/archive/reopen journeys. The original starter source is retained under src/legacy.
+
+Automated validation passes 59 tests (30 unchanged P0 financial tests, 28 persistence/category/form/selector/security tests and 1 web boundary test), application/test typecheck and lint. Expo Doctor passes 20/20. Android/iOS Hermes and web bundles export; Android prebuild confirms SQLCipher enabled and auto-backup disabled.
+
+**BLOCKED: native sign-off.** Java/JAVA_HOME is unavailable, no phone/emulator is connected/configured, and emulator acceleration reports a missing hypervisor driver. A native SQLCipher/SecureStore and UI kill/relaunch acceptance pass on Android and iOS is still required. Desktop SQLite tests and JS exports are not that pass. P1 is not marked fully verified, and no Supabase, RevenueCat, AdMob or Pro algorithms have been started.
+
+See [P1_STORAGE.md](P1_STORAGE.md), [P1_NATIVE_SETUP.md](P1_NATIVE_SETUP.md) and [P1_VERIFICATION.md](P1_VERIFICATION.md) for the storage boundary, exact build steps, results and changed-file manifest.
 
 ## Approved P1 category and audience correction
 
