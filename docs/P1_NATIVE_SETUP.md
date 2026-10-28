@@ -1,6 +1,6 @@
 # P1 native development build and device verification
 
-The application code and desktop checks are implemented. **Native SQLCipher / SecureStore and full UI verification remain blocked until a native build is running on an Android or iOS test target.** Do not treat an exported JavaScript bundle as an installed native build.
+The Android native build/storage checks now pass, including real SQLCipher/SecureStore initialization and isolated financial persistence through connection and JavaScript runtime reload. Welcome is confirmed on the phone. **Full UI/OS lifecycle/offline-release and iOS verification remain open.** See [P1_ANDROID_VERIFICATION.md](P1_ANDROID_VERIFICATION.md); do not treat a bundle export or a JavaScript reload as all native acceptance tests.
 
 ## Why Expo Go and web are blocked
 
@@ -12,7 +12,7 @@ Sources: [Expo 58 SQLite / SQLCipher](https://docs.expo.dev/versions/v58.0.0/sdk
 
 ## Configuration already supplied
 
-- `expo-sqlite ~58.0.14`, `expo-secure-store ~58.0.2`, `expo-crypto ~58.0.7`, `expo-file-system ~58.0.11`, `expo-dev-client ~58.0.15` installed through the existing Expo 58 installer.
+- `expo-sqlite ~58.0.14`, `expo-secure-store ~58.0.2`, `expo-crypto ~58.0.7`, `expo-file-system ~58.0.12`, `expo-dev-client ~58.0.16` installed/aligned through the existing Expo 58 installer.
 - `app.json`: SQLCipher enabled for native platforms; Android auto-backup disabled to avoid restoring a database without its device key.
 - `app.config.ts`: development app identity `app.nodebt.development` on both platforms. This is a test identity, not an approved production registration. A production EAS build fails without an explicitly supplied `NODEBT_APP_ID`.
 - `eas.json`: internal development build and iOS simulator profiles. No Expo project, signing identity, paid build, or cloud resource was created.
@@ -36,7 +36,7 @@ Updated by the 27 October 2026 [technical audit](TECHNICAL_AUDIT.md); the earlie
 
 The first real build reached Worklets C++ compilation but Ninja 1.10.2 (from CMake 3.22.1) failed creating long generated object paths. Windows `LongPathsEnabled` is already 1. Following [Expo's documented correction](https://docs.expo.dev/troubleshooting/windows-long-paths/), `app.config.ts` now selects CMake **3.31.6 only on Windows** through the SDK-compatible build-properties plugin. Linux/EAS/macOS keep their defaults. Do not move the repository or change packages/security policies to shorten paths.
 
-Install that exact CMake SDK package in Android Studio: Settings → Languages & Frameworks → Android SDK → SDK Tools → Show Package Details → CMake → **3.31.6**. The SDK Manager is prepared with only this additional package selected. Installation/rebuild verification is still pending. The downloaded SDK CLI was blocked by Windows Application Control; use the built-in Studio SDK Manager instead of disabling or bypassing the policy. After installation, `cmake\3.31.6\bin\ninja.exe --version` under the SDK should report the newer Ninja, and the native build must be retried.
+The user installed CMake **3.31.6** in Android Studio's SDK Tools. Its Ninja reports **1.12.1** and the original native APK build/install succeeded. On another Windows machine, use Settings → Languages & Frameworks → Android SDK → SDK Tools → Show Package Details → CMake → 3.31.6. The SDK CLI was blocked by Windows Application Control on this machine; the policy was preserved and Studio's built-in SDK Manager was used. No further CMake installation approval is pending.
 
 ## Option A — Local Android build
 
@@ -77,7 +77,7 @@ For physical iOS, use the same `development` profile with `--platform ios` after
 
 Use an isolated development installation with synthetic test entries. Do not uninstall or clear an installation containing real guest records; complete backup/recovery belongs to P2.
 
-1. Cold start: native encrypted storage opens; Welcome appears once. Expo Go/web instead show the storage requirement and cannot create records.
+1. Cold start: native encrypted storage opens; Welcome appears once. This now passes on the Android development installation after the native-path/URI fix; retest on other platforms/builds. Expo Go/web instead show the storage requirement and cannot create records.
 2. Add an interest-free **Money I Owe** record: INR 10,000 principal, monthly INR 5,000 due on the 10th for two installments. Use a real date at/before today for the opening snapshot.
 3. Add **Money Owed to Me**: INR 10,000 principal in a lending category. Confirm independent borrowing and lending totals.
 4. Record a partial INR 3,000 repayment and INR 2,500 collection. Expect INR 7,000 owed and INR 7,500 receivable. A due installment's unpaid INR 2,000 stays outstanding/overdue after its date; the next installment stays INR 5,000.

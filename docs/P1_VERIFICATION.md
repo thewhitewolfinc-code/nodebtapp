@@ -1,8 +1,8 @@
 # P1 verification and change manifest
 
-Reviewed 27 October 2026. **P1 code is implemented and automated checks pass. P1 is not fully signed off: native SQLCipher/SecureStore and installed-app journey verification are BLOCKED on native environment/target setup.** No subsequent integration/Pro milestone has started.
+Original checkpoint, 27 October 2026: P1 code was implemented and automated checks passed; native verification was then blocked on environment/target setup. **Current status: Android encrypted persistence passes; full device-journey and iOS sign-off remain open.** No subsequent integration/Pro milestone has started.
 
-**Subsequent audit:** this file preserves the original P1 evidence/manifest. [TECHNICAL_AUDIT.md](TECHNICAL_AUDIT.md) has newer results: 60 passing tests, repaired Java/SDK user environment, physical Android Expo Go connectivity over USB/Wi-Fi, corrected native-import startup handling and the Windows CMake/Ninja build diagnosis. The old machine findings below are historical, not a recommendation to reinstall Java or a hypervisor driver.
+**Subsequent audit:** this file preserves the original P1 evidence/manifest. [P1_ANDROID_VERIFICATION.md](P1_ANDROID_VERIFICATION.md) and [TECHNICAL_AUDIT.md](TECHNICAL_AUDIT.md) have newer results: 62 passing tests, repaired native environment, APK build/install, a fixed native-path/FileSystem-URI startup error and passing isolated native SQLCipher/financial/reload tests. Welcome is confirmed on the phone. Full device acceptance and iOS remain open. The old machine findings below are historical, not a recommendation to reinstall Java or a hypervisor driver.
 
 ## Delivered
 
