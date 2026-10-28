@@ -40,7 +40,9 @@
           "useSQLCipher": true
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-file-system",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
