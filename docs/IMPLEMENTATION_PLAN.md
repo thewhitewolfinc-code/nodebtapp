@@ -93,6 +93,8 @@ Automated validation passes 62 tests (30 unchanged P0 financial tests, 28 persis
 
 See [P1_STORAGE.md](P1_STORAGE.md), [P1_NATIVE_SETUP.md](P1_NATIVE_SETUP.md) and [P1_VERIFICATION.md](P1_VERIFICATION.md) for the storage boundary, exact build steps, results and changed-file manifest.
 
+Final 28 October update: the SDK-patched APK is installed and its fresh native integration tests pass. OS force-stop/cold relaunch preserves the exact isolated financial snapshot; all five tabs pass empty-state touch smoke tests. The real guest ledger remains empty and onboarding stays saved. Full financial form/lifecycle/accessibility, device reboot, standalone offline and iOS acceptance still gate P1 sign-off. The 62-test/typecheck/lint check was rerun successfully after device testing.
+
 ## Approved P1 category and audience correction
 
 - Free: exactly 6 default borrowing categories and 6 default lending categories; up to 3 custom categories per direction.

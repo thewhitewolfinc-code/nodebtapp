@@ -1,6 +1,6 @@
 # P1 native development build and device verification
 
-The Android native build/storage checks now pass, including real SQLCipher/SecureStore initialization and isolated financial persistence through connection and JavaScript runtime reload. Welcome is confirmed on the phone. **Full UI/OS lifecycle/offline-release and iOS verification remain open.** See [P1_ANDROID_VERIFICATION.md](P1_ANDROID_VERIFICATION.md); do not treat a bundle export or a JavaScript reload as all native acceptance tests.
+The Android native build/storage checks now pass, including real SQLCipher/SecureStore initialization and exact isolated financial persistence through connection, JavaScript runtime reload and OS force-stop/cold relaunch on the updated APK. Welcome and five-tab empty-state navigation are verified. **Full financial UI, device reboot, standalone offline and iOS verification remain open.** See [P1_ANDROID_VERIFICATION.md](P1_ANDROID_VERIFICATION.md); do not treat the scoped checks as all native acceptance tests.
 
 ## Why Expo Go and web are blocked
 
