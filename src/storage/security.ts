@@ -4,6 +4,16 @@ export class StorageSecurityError extends Error {
   constructor(message: string) { super(message); this.name = 'StorageSecurityError'; }
 }
 
+/** SQLite returns a native path on Android; FileSystem's File constructor requires a file URI. */
+export function nativeDirectoryFileUri(directory: string): string {
+  if (typeof directory !== 'string' || !directory) throw new StorageSecurityError('The native database directory is unavailable. Existing data was not changed.');
+  if (directory.startsWith('file://')) return directory;
+  if (!directory.startsWith('/') || directory.startsWith('//')) {
+    throw new StorageSecurityError('The native database directory is invalid. Existing data was not changed.');
+  }
+  return `file://${directory.split('/').map(encodeURIComponent).join('/')}`;
+}
+
 export interface KeyServices {
   readonly databaseExists: () => Promise<boolean>;
   readonly getKey: () => Promise<string | null>;

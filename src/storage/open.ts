@@ -3,7 +3,7 @@ import type { SecureStoreOptions } from 'expo-secure-store';
 
 import { LocalDatabase, type SqlConnection } from './database.ts';
 import { GuestRepository } from './repository.ts';
-import { obtainDeviceKey, StorageSecurityError, unlockEncryptedConnection } from './security.ts';
+import { nativeDirectoryFileUri, obtainDeviceKey, StorageSecurityError, unlockEncryptedConnection } from './security.ts';
 
 const DATABASE_NAME = 'nodebt-guest-v1.db';
 const KEY_NAME = 'nodebt.database.key.v1';
@@ -31,7 +31,7 @@ async function createRepository(): Promise<GuestRepository> {
   const key = await obtainDeviceKey({
     getKey: () => SecureStore.getItemAsync(KEY_NAME, secureOptions),
     setKey: (value) => SecureStore.setItemAsync(KEY_NAME, value, secureOptions),
-    databaseExists: async () => new File(SQLite.defaultDatabaseDirectory, DATABASE_NAME).exists,
+    databaseExists: async () => new File(nativeDirectoryFileUri(SQLite.defaultDatabaseDirectory), DATABASE_NAME).exists,
     randomBytes: (count) => Crypto.getRandomBytesAsync(count),
   });
   // Dedicated connection also avoids registering financial data with the SQLite devtools inspector.
