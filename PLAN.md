@@ -715,6 +715,8 @@ The latest documented 28 October run reports **62 passing tests**, application/t
 
 This documentation task reran `npm.cmd run check`: **PASS**, including application/test TypeScript, ESLint and all **62 tests**. The existing non-failing Node module-type warning remains. Expo Doctor/build/device results above remain the dated prior evidence, not a new native acceptance pass performed during documentation review.
 
+**29 October maintenance:** Expo 58.0.21 / React Native 0.88.1 patch alignment, the clean-CI official-types fix, fresh 62-test/typecheck/lint and 20/20 Doctor checks, all-platform export, Android native compilation and GitHub Actions pass. No phone was attached for this patch's native runtime acceptance. See [GitHub and Expo verification](docs/GITHUB_EXPO_VERIFICATION.md); this maintenance does not close P1 or imply an Expo connector/EAS workflow ran.
+
 Native Android APK build/install and encrypted fixtures pass on Motorola edge 60 fusion / Android 17 / arm64. The patched build retained onboarding, opened the real guest ledger with zero seeded financial records, passed five-tab empty-state navigation, and retained an exact isolated two-record/five-revision snapshot after force-stop/cold launch. Audit fixtures/keys were removed afterward without clearing guest data.
 
 Android/iOS Hermes and web bundle exports passed in the audit; exports do not prove iOS native acceptance or a standalone production build. Expo Go USB/Wi-Fi connectivity is verified only for its expected encryption-required screen. The full tracker requires the installed Nodebt native build. Debug cold launch still needs Metro for JS, so standalone offline cold start is unverified.
