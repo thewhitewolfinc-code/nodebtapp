@@ -4,6 +4,7 @@ Private borrowing and lending tracking built in the existing Expo 58 / React Nat
 
 P0's financial engine is retained. P1 connects encrypted native SQLite persistence, guest onboarding, Home/Records/Activity/Insights/Settings, categories, repayments/collections, financial revisions, explicit adjustments, settlement and record lifecycle journeys. **Android encrypted storage and isolated native financial tests now pass; complete device journeys and iOS verification remain pending. This is not a release-ready build.**
 
+- [Master development blueprint](PLAN.md)
 - [Approved decisions and readiness](docs/DEVELOPMENT_READINESS.md)
 - [Implementation milestones](docs/IMPLEMENTATION_PLAN.md)
 - [P1 storage design](docs/P1_STORAGE.md)
@@ -11,6 +12,7 @@ P0's financial engine is retained. P1 connects encrypted native SQLite persisten
 - [Verification results and exact changed files](docs/P1_VERIFICATION.md)
 - [Technical audit and Android connectivity results](docs/TECHNICAL_AUDIT.md)
 - [28 October Android storage verification](docs/P1_ANDROID_VERIFICATION.md)
+- [29 October GitHub and Expo verification](docs/GITHUB_EXPO_VERIFICATION.md)
 
 ## Development
 
