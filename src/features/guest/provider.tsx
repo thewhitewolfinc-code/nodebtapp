@@ -1,19 +1,19 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type PropsWithChildren } from 'react';
-import { ActivityIndicator, AppState } from 'react-native';
+import { AppState } from 'react-native';
 
-import { Button, Card, Copy, Page } from '@/components/nodebt/ui';
+import { Button, Card, Copy, LoadingState, Page } from '@/components/nodebt/ui';
 import type { CommandResult, GuestCommand, GuestSnapshot } from '@/storage/models';
 import { localToday, openGuestRepository } from '@/storage/open';
 import type { GuestRepository } from '@/storage/repository';
 
-interface GuestContextValue {
+export interface GuestContextValue {
   readonly snapshot: GuestSnapshot;
   readonly busy: boolean;
   readonly today: string;
   readonly createOperationId: () => string;
   readonly execute: (operationId: string, command: GuestCommand) => Promise<CommandResult>;
 }
-const GuestContext = createContext<GuestContextValue | undefined>(undefined);
+export const GuestContext = createContext<GuestContextValue | undefined>(undefined);
 interface GuestState { repository?: GuestRepository; snapshot?: GuestSnapshot; createOperationId?: () => string; error?: string }
 async function readGuestState(): Promise<GuestState> {
   try {
@@ -51,10 +51,10 @@ export function GuestProvider({ children }: PropsWithChildren) {
     } finally { locked.current = false; setBusy(false); }
   }, [state.repository]);
   if (state.error) return <Page title="Secure storage required" subtitle="Your financial records have not been reset.">
-    <Card><Copy>{state.error}</Copy><Copy variant="caption">Use the Nodebt Android or iOS development build. Setup steps are in docs/P1_NATIVE_SETUP.md.</Copy></Card>
+    <Card><Copy>{state.error}</Copy><Copy variant="caption">Use the Nodebt Android or iOS development build. Install the native development app for this device, then retry.</Copy></Card>
     <Button label="Retry opening storage" onPress={() => { setState({}); void readGuestState().then(setState); }} />
   </Page>;
-  if (!state.snapshot || !state.createOperationId) return <Page title="Opening Nodebt"><ActivityIndicator /><Copy>Opening your encrypted ledger…</Copy></Page>;
+  if (!state.snapshot || !state.createOperationId) return <Page title="Opening Nodebt"><LoadingState /></Page>;
   return <GuestContext value={{ snapshot: state.snapshot, busy, today, execute, createOperationId: state.createOperationId }}>{children}</GuestContext>;
 }
 export function useGuest(): GuestContextValue {

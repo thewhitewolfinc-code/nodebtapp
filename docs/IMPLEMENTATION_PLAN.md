@@ -1,5 +1,7 @@
 # Nodebt implementation plan
 
+> 30 October auth-screen brief: Clerk supersedes the historical Supabase Auth choice for this milestone. Backend/account storage and token trust remain unimplemented; see [AUTH_IMPLEMENTATION.md](AUTH_IMPLEMENTATION.md). No guest import or backend changes are authorized by the screen implementation.
+
 Approved product decisions are recorded in [DEVELOPMENT_READINESS.md](DEVELOPMENT_READINESS.md). This plan orders delivery of the full commercial MVP; only explicitly deferred features are excluded. Continue in the existing repository and keep the lockfile and Git history.
 
 ## Architecture and defaults

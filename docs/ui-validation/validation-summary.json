@@ -1,0 +1,182 @@
+{
+  "date": "2026-10-30",
+  "platform": "Android API 37 emulator",
+  "primaryConfiguration": "1080x1920, 440 dpi, font scale 1.0",
+  "automated": {
+    "typecheck": "passed",
+    "lint": "passed",
+    "tests": {
+      "passed": 69,
+      "failed": 0
+    },
+    "contrastPairs": 18,
+    "contrastPassed": true
+  },
+  "captures": [
+    {
+      "name": "home-empty",
+      "group": "overview",
+      "width": 1080,
+      "height": 1920,
+      "sampleData": false,
+      "runtimeErrorDetected": false
+    },
+    {
+      "name": "home-populated",
+      "group": "overview",
+      "width": 1080,
+      "height": 1920,
+      "sampleData": true,
+      "runtimeErrorDetected": false
+    },
+    {
+      "name": "records-populated",
+      "group": "overview",
+      "width": 1080,
+      "height": 1920,
+      "sampleData": true,
+      "runtimeErrorDetected": false
+    },
+    {
+      "name": "activity-populated",
+      "group": "overview",
+      "width": 1080,
+      "height": 1920,
+      "sampleData": true,
+      "runtimeErrorDetected": false
+    },
+    {
+      "name": "insights-populated",
+      "group": "overview",
+      "width": 1080,
+      "height": 1920,
+      "sampleData": true,
+      "runtimeErrorDetected": false
+    },
+    {
+      "name": "settings-populated",
+      "group": "overview",
+      "width": 1080,
+      "height": 1920,
+      "sampleData": true,
+      "runtimeErrorDetected": false
+    },
+    {
+      "name": "new",
+      "group": "workflows",
+      "width": 1080,
+      "height": 1920,
+      "sampleData": true,
+      "runtimeErrorDetected": false
+    },
+    {
+      "name": "detail",
+      "group": "workflows",
+      "width": 1080,
+      "height": 1920,
+      "sampleData": true,
+      "runtimeErrorDetected": false
+    },
+    {
+      "name": "payment",
+      "group": "workflows",
+      "width": 1080,
+      "height": 1920,
+      "sampleData": true,
+      "runtimeErrorDetected": false
+    },
+    {
+      "name": "collection",
+      "group": "workflows",
+      "width": 1080,
+      "height": 1920,
+      "sampleData": true,
+      "runtimeErrorDetected": false
+    },
+    {
+      "name": "settlement",
+      "group": "workflows",
+      "width": 1080,
+      "height": 1920,
+      "sampleData": true,
+      "runtimeErrorDetected": false
+    },
+    {
+      "name": "correction",
+      "group": "workflows",
+      "width": 1080,
+      "height": 1920,
+      "sampleData": true,
+      "runtimeErrorDetected": false
+    },
+    {
+      "name": "closed",
+      "group": "workflows",
+      "width": 1080,
+      "height": 1920,
+      "sampleData": true,
+      "runtimeErrorDetected": false
+    },
+    {
+      "name": "categories",
+      "group": "workflows",
+      "width": 1080,
+      "height": 1920,
+      "sampleData": true,
+      "runtimeErrorDetected": false
+    },
+    {
+      "name": "missing",
+      "group": "workflows",
+      "width": 1080,
+      "height": 1920,
+      "sampleData": true,
+      "runtimeErrorDetected": false
+    },
+    {
+      "name": "payment-review",
+      "group": "states",
+      "width": 1080,
+      "height": 1920,
+      "sampleData": true,
+      "runtimeErrorDetected": false
+    },
+    {
+      "name": "states",
+      "group": "states",
+      "width": 1080,
+      "height": 1920,
+      "sampleData": true,
+      "runtimeErrorDetected": false
+    },
+    {
+      "name": "confirmation",
+      "group": "states",
+      "width": 1080,
+      "height": 1920,
+      "sampleData": true,
+      "runtimeErrorDetected": false
+    },
+    {
+      "name": "home-dark",
+      "group": "states",
+      "width": 1080,
+      "height": 1920,
+      "sampleData": true,
+      "runtimeErrorDetected": false
+    },
+    {
+      "name": "settings-dark",
+      "group": "states",
+      "width": 1080,
+      "height": 1920,
+      "sampleData": true,
+      "runtimeErrorDetected": false
+    }
+  ],
+  "pending": [
+    "Supplemental tablet and large-text visual checks: final emulator capture approval review timed out twice.",
+    "iOS device validation",
+    "Physical-device visual validation"
+  ]
+}

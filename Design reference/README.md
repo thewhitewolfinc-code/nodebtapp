@@ -1,8 +1,10 @@
-# Nodebt design references
+# NoDebt design references
 
-- [UI design.png](UI%20design.png)
-- [UI design 2.png](UI%20design%202.png)
+- [Authentication screen](auth-ref-screen.png): source of truth for the auth composition.
+- [Design system](Design%20System.png): foundations, Inter typography, colors and component language.
+- [Reference board 1](designreference%201.png) and [reference board 2](designreference%202.png): wider page patterns and polish.
+- [Official brand icon](Logoicon.png): source for the runtime authentication mark.
 
-These supplied mockups are visual references, not implemented screens or a replacement for [PLAN.md](../PLAN.md) and the [approved decisions](../docs/DEVELOPMENT_READINESS.md). Illustrated names, balances, charts and dates are sample artwork, not persisted user records.
+The complete reference comparison and its application to the remaining guest pages is recorded in [UI refinement](../docs/UI_REFINEMENT.md), with [native visual evidence](../docs/ui-validation/README.md).
 
-Do not adopt behavior from an image that conflicts with the approved product. In particular, the illustrated net-position card does not authorize netting receivables against liabilities or using expected collections as repayment cash. Navigation labels, total/original-balance progress and interest assumptions also require reconciliation with the approved flows and validated financial engine before implementation.
+These images are visual references. Illustrated names, balances, charts and dates are artwork, not persisted user records. Approved financial requirements in [PLAN.md](../PLAN.md) still govern calculations, separate borrowing/lending balances, and data handling. The 30 October auth brief supersedes the historical identity-provider choice for this screen; see [the implementation record](../docs/AUTH_IMPLEMENTATION.md).

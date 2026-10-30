@@ -1,0 +1,1 @@
+Feather font and glyph map vendored from @expo/vector-icons 15.1.1. MIT license preserved alongside these assets. Icons render through the existing Expo Font module; no deprecated icon component or new native module is required.

@@ -1,0 +1,38 @@
+[
+  {
+    "name": "body on canvas",
+    "text": "#58616C",
+    "surface": "#FAFCF8",
+    "ratio": 6.09
+  },
+  {
+    "name": "action label on lime",
+    "text": "#101909",
+    "surface": "#C2F568",
+    "ratio": 14.21
+  },
+  {
+    "name": "guest label on white",
+    "text": "#101909",
+    "surface": "#FFFFFF",
+    "ratio": 18.03
+  },
+  {
+    "name": "focus on canvas",
+    "text": "#176640",
+    "surface": "#FAFCF8",
+    "ratio": 6.76
+  },
+  {
+    "name": "error on error surface",
+    "text": "#A32932",
+    "surface": "#FFF0F0",
+    "ratio": 6.5
+  },
+  {
+    "name": "info on info surface",
+    "text": "#175A91",
+    "surface": "#EEF6FE",
+    "ratio": 6.62
+  }
+]

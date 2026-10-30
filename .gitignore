@@ -45,4 +45,45 @@ example
 # Credentials
 .env
 .env.*
-!.env.example
+
+
+# Clerk CLI links, local credentials and claim material
+.clerk/
+
+# Local credentials, signing material and service-account configuration
+.env*
+*.keystore
+*.pfx
+*.p12
+*.der
+*.csr
+*.jks
+*.key
+*.pem
+*.p8
+*.p7b
+*.p7c
+*.mobileprovision
+.npmrc
+.netrc
+credentials.json
+credentials-*.json
+*-credentials.json
+service-account*.json
+*service-account*.json
+google-services.json
+GoogleService-Info.plist
+.aws/
+.ssh/
+.secrets/
+secrets/
+
+# Local financial databases, backups, raw device dumps and build logs
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+*.sqlite-*
+*.log
+/docs/auth-validation/*.xml
+/docs/ui-validation/*.xml

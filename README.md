@@ -14,7 +14,15 @@ P0's financial engine is retained. P1 connects encrypted native SQLite persisten
 - [28 October Android storage verification](docs/P1_ANDROID_VERIFICATION.md)
 - [29 October GitHub and Expo verification](docs/GITHUB_EXPO_VERIFICATION.md)
 
+## Authentication UI milestone (30 October)
+
+The supplied auth design uses Clerk Google sign-in, native secure token caching, protected account navigation, verification follow-up and sign-out. The selected Clerk application is linked and its development public configuration is restored locally. Guest tracking remains local and encrypted; account financial storage is a separate milestone. See [current Clerk integration and verification](docs/CLERK_AUTH.md), [design analysis](docs/AUTH_IMPLEMENTATION.md), and [earlier native visual validation](docs/auth-validation/README.md). The [Dashboard follow-up](docs/AUTH_DASHBOARD_VALIDATION.md) records the new authenticated entry, separate profile screen, offline recovery, Android evidence and remaining live acceptance checks.
+
+The [authentication readiness audit](docs/AUTH_READINESS.md) records the corrected callback allowlist, Dashboard routing, offline recovery, 93 passing tests, and the remaining device/backend/release work.
+
 ## Development
+
+The [front-end refinement milestone](docs/UI_REFINEMENT.md) extends the supplied design references across all existing guest pages and financial forms, with shared light/dark components and responsive layouts. Review the [native screenshot gallery](docs/ui-validation/gallery.html) and [validation notes](docs/ui-validation/README.md). Populated catalog screens are read-only development samples; no backend or integration work is included in this milestone.
 
 Use the existing `Nodebt` directory. Validated runtime: Node 24.22.0 / npm 11.19.1. PowerShell's current script policy requires the `.cmd` launchers.
 

@@ -1,0 +1,193 @@
+{
+  "date": "2026-10-30",
+  "emulator": "Medium_Phone",
+  "androidApi": 37,
+  "abi": "x86_64",
+  "checks": {
+    "typecheck": "passed",
+    "lint": "passed with no warnings",
+    "tests": 69,
+    "testsPassed": 69
+  },
+  "captures": [
+    {
+      "name": "final",
+      "width": 1080,
+      "height": 1920,
+      "dpi": 440,
+      "fontScale": 1,
+      "actions": [
+        {
+          "label": "Continue with Google",
+          "bounds": [
+            83,
+            1403,
+            998,
+            1551
+          ],
+          "heightDp": 53.8,
+          "enabled": true
+        },
+        {
+          "label": "Continue as Guest",
+          "bounds": [
+            83,
+            1574,
+            998,
+            1723
+          ],
+          "heightDp": 54.2,
+          "enabled": true
+        }
+      ],
+      "runtimeErrorVisible": false
+    },
+    {
+      "name": "large-screen",
+      "width": 1080,
+      "height": 2400,
+      "dpi": 420,
+      "fontScale": 1,
+      "actions": [
+        {
+          "label": "Continue with Google",
+          "bounds": [
+            79,
+            1646,
+            1001,
+            1787
+          ],
+          "heightDp": 53.7,
+          "enabled": true
+        },
+        {
+          "label": "Continue as Guest",
+          "bounds": [
+            79,
+            1809,
+            1001,
+            1951
+          ],
+          "heightDp": 54.1,
+          "enabled": true
+        }
+      ],
+      "runtimeErrorVisible": false
+    },
+    {
+      "name": "large-text",
+      "width": 1080,
+      "height": 2400,
+      "dpi": 420,
+      "fontScale": 1.5,
+      "actions": [
+        {
+          "label": "Continue with Google",
+          "bounds": [
+            79,
+            1791,
+            1001,
+            1986
+          ],
+          "heightDp": 74.3,
+          "enabled": true
+        },
+        {
+          "label": "Continue as Guest",
+          "bounds": [
+            79,
+            2007,
+            1001,
+            2149
+          ],
+          "heightDp": 54.1,
+          "enabled": true
+        }
+      ],
+      "runtimeErrorVisible": false
+    },
+    {
+      "name": "keyboard-focus",
+      "width": 1080,
+      "height": 2400,
+      "dpi": 420,
+      "fontScale": 1.5,
+      "actions": [
+        {
+          "label": "Continue with Google",
+          "bounds": [
+            79,
+            1791,
+            1001,
+            1991
+          ],
+          "heightDp": 76.2,
+          "enabled": true
+        },
+        {
+          "label": "Continue as Guest",
+          "bounds": [
+            79,
+            2013,
+            1001,
+            2155
+          ],
+          "heightDp": 54.1,
+          "enabled": true
+        }
+      ],
+      "runtimeErrorVisible": false
+    },
+    {
+      "name": "google-unavailable",
+      "width": 1080,
+      "height": 1920,
+      "dpi": 440,
+      "fontScale": 1,
+      "actions": [
+        {
+          "label": "Continue with Google",
+          "bounds": [
+            83,
+            1225,
+            998,
+            1373
+          ],
+          "heightDp": 53.8,
+          "enabled": true
+        },
+        {
+          "label": "Continue as Guest",
+          "bounds": [
+            83,
+            1396,
+            998,
+            1545
+          ],
+          "heightDp": 54.2,
+          "enabled": true
+        }
+      ],
+      "runtimeErrorVisible": false
+    },
+    {
+      "name": "cold-start",
+      "width": 1080,
+      "height": 1920,
+      "dpi": 440,
+      "fontScale": 1,
+      "actions": [],
+      "runtimeErrorVisible": false
+    },
+    {
+      "name": "guest-return",
+      "width": 1080,
+      "height": 2400,
+      "dpi": 420,
+      "fontScale": 1.5,
+      "actions": [],
+      "runtimeErrorVisible": false
+    }
+  ],
+  "keyboardFocusObserved": true
+}
